@@ -1,10 +1,10 @@
 import { db } from "../connect.js";
 import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+import jwt from "jsonwebtoken";
 
+// register
 export const register = (req, res) => {
   //CHECK USER IF EXISTS
-  const userId = uuidv4();
 
   const q = "SELECT * FROM users WHERE username = ?";
 
@@ -18,9 +18,8 @@ export const register = (req, res) => {
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
     const q =
-      "INSERT INTO users (`userId`,`username`,`email`,`password`,`name`) VALUES (?)";
+      "INSERT INTO users (`username`,`email`,`password`,`name`) VALUES (?)";
     const values = [
-      userId,
       req.body.username,
       req.body.email,
       hashedPassword,
@@ -32,5 +31,45 @@ export const register = (req, res) => {
     });
   });
 };
-export const login = () => {};
-export const logout = () => {};
+
+// login
+export const login = (req, res) => {
+  //check if user is register or not
+  const q = "SELECT * FROM users WHERE username = ?";
+
+  db.query(q, [req.body.username], (err, data) => {
+    if (err) return res.status(409).json(err);
+    if (data.length === 0) return res.status(404).json("User Not Found");
+    res.status(200);
+    console.log(data, "data");
+
+    // decrypting the password
+    const checkPassword = bcrypt.compareSync(
+      req.body.password,
+      data[0].password
+    );
+
+    if (!checkPassword)
+      return res.status(400).json("Wrong password or username");
+
+    const token = jwt.sign({ id: data[0].id }, "secretkey");
+
+    const { password, ...others } = data[0];
+
+    res
+      .cookie("accessToken", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .json({ others, token });
+  });
+};
+export const logout = (req, res) => {
+  res
+    .clearCookie("accessToken", {
+      secure: true,
+      sameSite: "none", //this is because react is in 3000 port back end in different port this will block the section
+    })
+    .status(200)
+    .json("User has been locked out");
+};
