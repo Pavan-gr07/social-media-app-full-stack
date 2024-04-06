@@ -1,10 +1,14 @@
 import express from "express";
+import userRoutes from "./routes/users.js";
+import postsRoutes from "./routes/posts.js";
+import likesRoutes from "./routes/likes.js";
+import commentsRoutes from "./routes/comments.js";
+import authRoutes from "./routes/auth.js";
+
 const app = express();
-import userRoutes from "./routes/users";
-import postsRoutes from "./routes/posts";
-import likesRoutes from "./routes/likes";
-import commentsRoutes from "./routes/comments";
-import authRoutes from "./routes/auth";
+
+//middlewares
+app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
