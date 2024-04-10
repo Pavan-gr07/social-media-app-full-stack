@@ -6,15 +6,34 @@ import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { Link } from "react-router-dom";
 import Comments from "../comments/Comments";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
+import { makeRequest } from "../../axios";
+import { AuthContext } from "../../context/authContext";
 
 const Post = ({ post }) => {
   const [commentOpen, setCommentOpen] = useState(false);
 
-  //TEMPORARY
-  const liked = false;
+  const { currentUser } = useContext(AuthContext);
+  console.log(currentUser, "currentUser");
 
+  //TEMPORARY
+  const liked = true;
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: ["likes"],
+    queryFn: async () => {
+      try {
+        const response = await makeRequest.get("/likes?postId=" + post.id);
+        return response.data;
+      } catch (error) {
+        throw new Error("Failed to fetch likes");
+      }
+    },
+  });
+
+  console.log(data, "data");
   return (
     <div className="post">
       <div className="container">
@@ -39,8 +58,12 @@ const Post = ({ post }) => {
         </div>
         <div className="info">
           <div className="item">
-            {liked ? <FavoriteOutlinedIcon /> : <FavoriteBorderOutlinedIcon />}
-            12 Likes
+            {data?.includes(currentUser.id) ? (
+              <FavoriteOutlinedIcon style={{ color: "red" }} />
+            ) : (
+              <FavoriteBorderOutlinedIcon />
+            )}
+            {isLoading ? "loading..." : data?.length} likes
           </div>
           <div className="item" onClick={() => setCommentOpen(!commentOpen)}>
             <TextsmsOutlinedIcon />
@@ -51,7 +74,7 @@ const Post = ({ post }) => {
             Share
           </div>
         </div>
-        {commentOpen && <Comments />}
+        {commentOpen && <Comments postId={post?.id} />}
       </div>
     </div>
   );

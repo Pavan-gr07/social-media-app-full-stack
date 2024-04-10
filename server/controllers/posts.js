@@ -7,7 +7,7 @@ export const getPosts = (req, res) => {
   if (!token) return res.status(401).json("Not logged In!");
   // console.log(token, "token");
   const decodedToken = jwt.decode(token);
-  console.log(decodedToken, "decode----");
+  // console.log(decodedToken, "decode----");
 
   jwt.verify(token, "pavan@123", (err, userInfo) => {
     if (err) return res.status(403).json(err);

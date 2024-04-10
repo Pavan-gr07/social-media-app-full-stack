@@ -60,6 +60,10 @@ const Share = () => {
     setFile(null);
   };
 
+  const handleDesc = (e) => {
+    setDesc(e.target.value);
+  };
+
   return (
     <div className="share">
       <div className="container">
@@ -69,7 +73,8 @@ const Share = () => {
             <input
               type="text"
               placeholder={`What's on your mind ${currentUser.name}`}
-              onChange={(e) => setDesc(e.target.value)}
+              onChange={handleDesc}
+              value={desc}
             />
           </div>
           <div className="right">
@@ -90,7 +95,6 @@ const Share = () => {
               id="file"
               style={{ display: "none" }}
               onChange={(e) => setFile(e.target.files[0])}
-              value={desc}
             />
             <label htmlFor="file">
               <div className="item">
