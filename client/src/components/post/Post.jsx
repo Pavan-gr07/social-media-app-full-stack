@@ -10,19 +10,16 @@ import { useContext, useState } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { makeRequest } from "../../axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../../context/authContext";
 
 const Post = ({ post }) => {
   const [commentOpen, setCommentOpen] = useState(false);
 
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser, "currentUser");
-
-  //TEMPORARY
-  const liked = true;
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ["likes"],
+    queryKey: ["likes", post.id],
     queryFn: async () => {
       try {
         const response = await makeRequest.get("/likes?postId=" + post.id);
@@ -33,7 +30,44 @@ const Post = ({ post }) => {
     },
   });
 
-  console.log(data, "data");
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationKey: ["likes"],
+    mutationFn: async (liked) => {
+      const token = localStorage.getItem("idToken");
+      try {
+        if (liked)
+          return await makeRequest.delete("/likes?postId=" + post.id, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          });
+        return await makeRequest.post(
+          "/likes",
+          { postId: post?.id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+      } catch (error) {
+        throw new Error("Failed to create post");
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries("likes");
+    },
+  });
+
+  const handleLike = async (e) => {
+    e.preventDefault();
+    mutation.mutate(data?.includes(JSON.parse(currentUser).id));
+  };
+
   return (
     <div className="post">
       <div className="container">
@@ -58,10 +92,13 @@ const Post = ({ post }) => {
         </div>
         <div className="info">
           <div className="item">
-            {data?.includes(currentUser.id) ? (
-              <FavoriteOutlinedIcon style={{ color: "red" }} />
+            {data?.includes(JSON.parse(currentUser).id) ? (
+              <FavoriteOutlinedIcon
+                style={{ color: "red" }}
+                onClick={handleLike}
+              />
             ) : (
-              <FavoriteBorderOutlinedIcon />
+              <FavoriteBorderOutlinedIcon onClick={handleLike} />
             )}
             {isLoading ? "loading..." : data?.length} likes
           </div>

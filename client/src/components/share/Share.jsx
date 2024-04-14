@@ -69,10 +69,12 @@ const Share = () => {
       <div className="container">
         <div className="top">
           <div className="left">
-            <img src={currentUser.profilePic} alt="" />
+            <img src={JSON.parse(currentUser)?.profilePic} alt="" />
             <input
               type="text"
-              placeholder={`What's on your mind ${currentUser.name}`}
+              placeholder={`What's on your mind ${
+                JSON.parse(currentUser).name
+              }`}
               onChange={handleDesc}
               value={desc}
             />

@@ -44,7 +44,7 @@ function App() {
   };
 
   const ProtectedRoute = ({ children }) => {
-    if (!currentUser) {
+    if (!localStorage.getItem("idToken")) {
       return <Navigate to="/login" />;
     }
 
