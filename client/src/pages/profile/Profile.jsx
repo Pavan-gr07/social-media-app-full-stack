@@ -8,9 +8,34 @@ import PlaceIcon from "@mui/icons-material/Place";
 import LanguageIcon from "@mui/icons-material/Language";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Posts from "../../components/posts/Posts"
+import Posts from "../../components/posts/Posts";
+import { useQuery } from "@tanstack/react-query";
+import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
+import { makeRequest } from "../../axios";
+import { useParams } from "react-router-dom";
 
 const Profile = () => {
+  const { id } = useParams();
+  const { currentUser } = useContext(AuthContext);
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      try {
+        const response = await makeRequest.get("/user", {
+          params: {
+            id,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        throw new Error("Failed to fetch likes");
+      }
+    },
+  });
+
+  console.log(data);
   return (
     <div className="profile">
       <div className="images">
@@ -45,25 +70,29 @@ const Profile = () => {
             </a>
           </div>
           <div className="center">
-            <span>Jane Doe</span>
+            <span>{data?.username}</span>
             <div className="info">
               <div className="item">
                 <PlaceIcon />
-                <span>USA</span>
+                <span>{data?.city}</span>
               </div>
               <div className="item">
                 <LanguageIcon />
-                <span>lama.dev</span>
+                <span>{data?.name}</span>
               </div>
             </div>
-            <button>follow</button>
+            {id == JSON.parse(currentUser)?.id ? (
+              <button>Update</button>
+            ) : (
+              <button>follow</button>
+            )}
           </div>
           <div className="right">
             <EmailOutlinedIcon />
             <MoreVertIcon />
           </div>
         </div>
-      <Posts/>
+        <Posts />
       </div>
     </div>
   );

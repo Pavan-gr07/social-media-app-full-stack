@@ -37,7 +37,7 @@ app.use("/api/upload", upload.single("file"), (req, res) => {
   res.status(200).json(file.filename);
 });
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/likes", likesRoutes);
 app.use("/api/comments", commentsRoutes);
