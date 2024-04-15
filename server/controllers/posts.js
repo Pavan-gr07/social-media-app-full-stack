@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import moment from "moment";
 
 export const getPosts = (req, res) => {
+  const userId = parseInt(req.query.userId);
+
   const token = req.headers.authorization.split(" ")[1];
   if (!token) return res.status(401).json("Not logged In!");
   // console.log(token, "token");
@@ -11,10 +13,16 @@ export const getPosts = (req, res) => {
 
   jwt.verify(token, "pavan@123", (err, userInfo) => {
     if (err) return res.status(403).json(err);
+    console.log(userId == undefined, "value");
     // const q = `SELECT * FROM posts AS p JOIN users AS u ON (u.id = p.userId)`;
-    const q = `SELECT p.*,u.id AS userId,name,profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) LEFT JOIN relationships AS r ON (p.userId = r.followedUserId ) WHERE r.followerUserId = ? OR p.userId = ? ORDER BY p.createAt DESC`;
 
-    db.query(q, [userInfo.id, userInfo.id], (err, data) => {
+    const q = userId
+      ? `SELECT p.*,u.id AS userId,name,profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) WHERE p.userId=?`
+      : `SELECT p.*,u.id AS userId,name,profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) LEFT JOIN relationships AS r ON (p.userId = r.followedUserId ) WHERE r.followerUserId = ? OR p.userId = ? ORDER BY p.createAt DESC`;
+
+    const values = userId ? [userId] : [userInfo.id, userInfo.id];
+
+    db.query(q, values, (err, data) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json(data);
     });

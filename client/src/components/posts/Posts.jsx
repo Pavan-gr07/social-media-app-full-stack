@@ -3,14 +3,14 @@ import Post from "../post/Post";
 import "./posts.scss";
 import { useQuery } from "@tanstack/react-query";
 
-const Posts = () => {
+const Posts = ({ userId }) => {
   const { isLoading, error, data } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const token = localStorage.getItem("idToken");
 
       try {
-        const response = await makeRequest.get("/posts", {
+        const response = await makeRequest.get("/posts?userId=" + userId, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

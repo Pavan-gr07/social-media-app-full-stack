@@ -4,6 +4,7 @@ import postsRoutes from "./routes/posts.js";
 import likesRoutes from "./routes/likes.js";
 import commentsRoutes from "./routes/comments.js";
 import authRoutes from "./routes/auth.js";
+import relationShipsRoutes from "./routes/relationShipsRoutes.js";
 import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
@@ -41,6 +42,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/likes", likesRoutes);
 app.use("/api/comments", commentsRoutes);
+app.use("/api/relationships", relationShipsRoutes);
 
 app.listen(8000, () => {
   console.log("BackEnd is Running");

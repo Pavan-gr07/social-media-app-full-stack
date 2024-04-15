@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
 import { makeRequest } from "../../axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
 const Profile = () => {
@@ -35,7 +36,59 @@ const Profile = () => {
     },
   });
 
-  console.log(data);
+  const { data: relationShipData } = useQuery({
+    queryKey: ["relationships"],
+    queryFn: async () => {
+      try {
+        const response = await makeRequest.get("/relationships?id=" + id);
+        return response.data;
+      } catch (error) {
+        throw new Error("Failed to fetch likes");
+      }
+    },
+  });
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationKey: ["relationships"],
+    mutationFn: async (follow) => {
+      const token = localStorage.getItem("idToken");
+      try {
+        if (follow)
+          return await makeRequest.delete("/relationships?id=" + id, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          });
+        return await makeRequest.post(
+          "/relationships",
+          { followedUserId: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
+      } catch (error) {
+        throw new Error("Failed to create post");
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries("relationships");
+    },
+  });
+
+  const handleFollow = (e) => {
+    e.preventDefault();
+    mutation.mutate(relationShipData?.includes(JSON.parse(currentUser).id));
+  };
+
+  console.log(relationShipData, "relationShipData");
+
   return (
     <div className="profile">
       <div className="images">
@@ -81,10 +134,15 @@ const Profile = () => {
                 <span>{data?.name}</span>
               </div>
             </div>
+            {console.log(JSON.parse(currentUser)?.id)}
             {id == JSON.parse(currentUser)?.id ? (
               <button>Update</button>
             ) : (
-              <button>follow</button>
+              <button onClick={handleFollow}>
+                {relationShipData?.includes(JSON.parse(currentUser)?.id)
+                  ? "Following"
+                  : "Follow"}
+              </button>
             )}
           </div>
           <div className="right">
@@ -92,7 +150,7 @@ const Profile = () => {
             <MoreVertIcon />
           </div>
         </div>
-        <Posts />
+        <Posts userId={id} />
       </div>
     </div>
   );
