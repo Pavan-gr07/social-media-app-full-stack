@@ -9,8 +9,9 @@ import LanguageIcon from "@mui/icons-material/Language";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Posts from "../../components/posts/Posts";
+import Update from "../../components/update/Update";
 import { useQuery } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/authContext";
 import { makeRequest } from "../../axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import { useParams } from "react-router-dom";
 const Profile = () => {
   const { id } = useParams();
   const { currentUser } = useContext(AuthContext);
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const { isLoading, error, data } = useQuery({
     queryKey: ["user"],
@@ -136,7 +138,7 @@ const Profile = () => {
             </div>
             {console.log(JSON.parse(currentUser)?.id)}
             {id == JSON.parse(currentUser)?.id ? (
-              <button>Update</button>
+              <button onClick={() => setUpdateOpen(true)}>Update</button>
             ) : (
               <button onClick={handleFollow}>
                 {relationShipData?.includes(JSON.parse(currentUser)?.id)
@@ -152,6 +154,7 @@ const Profile = () => {
         </div>
         <Posts userId={id} />
       </div>
+      {updateOpen && <Update handleCancel={() => setUpdateOpen(false)} />}
     </div>
   );
 };
