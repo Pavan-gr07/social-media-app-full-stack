@@ -89,19 +89,17 @@ const Profile = () => {
     mutation.mutate(relationShipData?.includes(JSON.parse(currentUser).id));
   };
 
-  console.log(relationShipData, "relationShipData");
-
   return (
     <div className="profile">
       <div className="images">
         <img
-          src="https://images.pexels.com/photos/13440765/pexels-photo-13440765.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          alt=""
+          src={"../upload/" + data?.coverPic}
+          alt="cover"
           className="cover"
         />
         <img
-          src="https://images.pexels.com/photos/14028501/pexels-photo-14028501.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
-          alt=""
+          src={"../upload/" + data?.profilePic}
+          alt="profile Pic"
           className="profilePic"
         />
       </div>
@@ -133,10 +131,9 @@ const Profile = () => {
               </div>
               <div className="item">
                 <LanguageIcon />
-                <span>{data?.name}</span>
+                <span>{data?.website}</span>
               </div>
             </div>
-            {console.log(JSON.parse(currentUser)?.id)}
             {id == JSON.parse(currentUser)?.id ? (
               <button onClick={() => setUpdateOpen(true)}>Update</button>
             ) : (
@@ -154,7 +151,13 @@ const Profile = () => {
         </div>
         <Posts userId={id} />
       </div>
-      {updateOpen && <Update handleCancel={() => setUpdateOpen(false)} />}
+      {updateOpen && (
+        <Update
+          handleCancel={() => setUpdateOpen(false)}
+          open={updateOpen}
+          userData={data}
+        />
+      )}
     </div>
   );
 };

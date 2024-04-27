@@ -52,3 +52,13 @@ export const addPosts = (req, res) => {
     });
   });
 };
+
+// delete posts
+export const deletePost = (req, res) => {
+  const q = "DELETE FROM posts WHERE id = ?";
+
+  db.query(q, [req.query.postId], (err, data) => {
+    if (err) return res.status(500).json(err);
+    return res.status(200).json("Post as been Deleted");
+  });
+};
