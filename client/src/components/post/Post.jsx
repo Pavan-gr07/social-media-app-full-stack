@@ -42,6 +42,18 @@ const Post = ({ post }) => {
     },
   });
 
+  const { data: commentsData } = useQuery({
+    queryKey: ["comments", post.id],
+    queryFn: async () => {
+      try {
+        const response = await makeRequest.get("/comments?postId=" + post.id);
+        return response.data;
+      } catch (error) {
+        throw new Error("Failed to fetch comments");
+      }
+    },
+  });
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -154,7 +166,7 @@ const Post = ({ post }) => {
           </div>
           <div className="item" onClick={() => setCommentOpen(!commentOpen)}>
             <TextsmsOutlinedIcon />
-            12 Comments
+            {commentsData?.length} Comments
           </div>
           <div className="item">
             <ShareOutlinedIcon />
